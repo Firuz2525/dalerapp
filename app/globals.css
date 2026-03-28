@@ -1,6 +1,23 @@
-@import "tailwindcss";
+html {
+  scroll-behavior: smooth;
+}
 
-:root {
+@import "tailwindcss";
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px); /* Starts 10px lower */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0); /* Ends at original position */
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.3s ease-out forwards;
+}
+/* :root {
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -23,4 +40,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+} */
+.backgc {
+  background-color: #fff1de;
 }
