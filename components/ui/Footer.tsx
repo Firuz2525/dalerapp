@@ -60,7 +60,7 @@ export default function Footer() {
             </h3>
             <div className="flex items-center gap-2">
               <a
-                href="https://t.me/yourchannel"
+                href="https://t.me/Daler095"
                 target="_blank"
                 className={socialLinkStyle}
                 aria-label="Telegram"
@@ -84,7 +84,7 @@ export default function Footer() {
                 <FaFacebookF size={18} />
               </a>
               <a
-                href="https://instagram.com/yourprofile"
+                href="https://www.instagram.com/tokyobrands?igsh=cDR5d3g0bWozbmIz&utm_source=qr"
                 target="_blank"
                 className={socialLinkStyle}
                 aria-label="Instagram"

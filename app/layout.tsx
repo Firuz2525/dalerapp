@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body className="bg-gray-50 text-gray-900">
         {/* min-h-screen ensures the page is at least the height of the window */}
         <div className="flex flex-col min-h-screen">

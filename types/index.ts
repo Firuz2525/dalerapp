@@ -1,14 +1,13 @@
-export type Product = {
+export interface Product {
   id: string;
   name: string;
   price: number;
-  image: string; // ✅ final stored URL
+  images: string[]; // Change 'image' to 'images' (plural array)
   brand: string;
   category: string;
   gender: "male" | "female";
   sizes: string[];
-};
-
+}
 export type CreateProduct = {
   name: string;
   price: string;

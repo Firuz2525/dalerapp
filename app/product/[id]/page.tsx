@@ -1,109 +1,73 @@
-import { products } from "@/data/products";
-import Image from "next/image";
-
-type Props = {
-  params: Promise<{
-    id: string;
-  }>;
-};
-
-export default async function ProductDetails({ params }: Props) {
-  const { id } = await params;
-
-  const product = products.find((p) => p.id === id);
-
-  if (!product) {
-    return <div className="p-6">Product not found</div>;
-  }
-
-  return (
-    <div className="max-w-5xl mx-auto p-6">
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="relative w-full aspect-[4/3] overflow-hidden rounded-lg">
-          <Image
-            src={product.image}
-            alt={product.name}
-            width={300}
-            height={200}
-            priority={product.id === "1"}
-            className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
-          />
-        </div>
-
-        <div>
-          <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
-
-          <p className="text-xl text-gray-700 mb-4">${product.price}</p>
-
-          <p className="mb-2">
-            <span className="font-semibold">Brand:</span> {product.brand}
-          </p>
-
-          <p className="mb-2">
-            <span className="font-semibold">Category:</span> {product.category}
-          </p>
-
-          <p className="mb-4">
-            <span className="font-semibold">Gender:</span> {product.gender}
-          </p>
-
-          {/* Sizes */}
-          <div className="mb-6">
-            <p className="font-semibold mb-2">Select Size:</p>
-            <div className="flex gap-2 flex-wrap">
-              {product.sizes.map((size) => (
-                <button
-                  key={size}
-                  className="border px-3 py-1 rounded hover:bg-black hover:text-white transition"
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Add to Cart */}
-          {/* <button className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition">
-            Add to Cart
-          </button> */}
-        </div>
-      </div>
-    </div>
-  );
-}
-// "use client";
-
+// import { products } from "@/data/products";
 // import Image from "next/image";
-// import { useZoom } from "@/context/ZoomContext"; // Import our new hook
 
-// export default function ProductCard({ product }: any) {
-//   const { setZoomedImage } = useZoom(); // Use the global function
+// type Props = {
+//   params: Promise<{
+//     id: string;
+//   }>;
+// };
+
+// export default async function ProductDetails({ params }: Props) {
+//   const { id } = await params;
+
+//   const product = products.find((p) => p.id === id);
+
+//   if (!product) {
+//     return <div className="p-6">Product not found</div>;
+//   }
 
 //   return (
-//     <div
-//       onClick={() => setZoomedImage(product.image)} // Trigger global zoom
-//       className="bg-white rounded-xl shadow-sm hover:shadow-md transition p-4 cursor-zoom-in group"
-//     >
-//       <div className="relative w-full aspect-[4/3] overflow-hidden rounded-lg bg-gray-50">
-//         <Image
-//           src={product.image}
-//           alt={product.name}
-//           fill
-//           className="object-contain transition-transform duration-500 group-hover:scale-110"
-//         />
-//       </div>
-//       <h2 className="mt-3 font-semibold text-lg">{product.name}</h2>
-//       <p className="text-blue-600 font-bold">${product.price}</p>
+//     <div className="max-w-5xl mx-auto p-6">
+//       <div className="grid md:grid-cols-2 gap-8">
+//         <div className="relative w-full aspect-[4/3] overflow-hidden rounded-lg">
+//           <Image
+//             // src={product.image}
+//             src="shoe.jpg"
+//             alt={product.name}
+//             width={300}
+//             height={200}
+//             priority={product.id === "1"}
+//             className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
+//           />
+//         </div>
 
-//       <div className="flex flex-wrap gap-1 mt-2">
-//         {product.sizes.map((size: string) => (
-//           <span
-//             key={size}
-//             className="text-[10px] bg-gray-100 px-2 py-1 rounded uppercase"
-//           >
-//             {size}
-//           </span>
-//         ))}
+//         <div>
+//           <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
+
+//           <p className="text-xl text-gray-700 mb-4">${product.price}</p>
+
+//           <p className="mb-2">
+//             <span className="font-semibold">Brand:</span> {product.brand}
+//           </p>
+
+//           <p className="mb-2">
+//             <span className="font-semibold">Category:</span> {product.category}
+//           </p>
+
+//           <p className="mb-4">
+//             <span className="font-semibold">Gender:</span> {product.gender}
+//           </p>
+
+//           {/* Sizes */}
+//           <div className="mb-6">
+//             <p className="font-semibold mb-2">Select Size:</p>
+//             <div className="flex gap-2 flex-wrap">
+//               {product.sizes.map((size) => (
+//                 <button
+//                   key={size}
+//                   className="border px-3 py-1 rounded hover:bg-black hover:text-white transition"
+//                 >
+//                   {size}
+//                 </button>
+//               ))}
+//             </div>
+//           </div>
+
+//           {/* Add to Cart */}
+//           {/* <button className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition">
+//             Add to Cart
+//           </button> */}
+//         </div>
 //       </div>
 //     </div>
 //   );
