@@ -162,7 +162,7 @@ export default function Navbar() {
       {/* Mobile Menu Content */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 top-16 z-[100] bg-white animate-fade-up overflow-y-auto p-6 space-y-8 pb-32">
-          {/* Brands (Mobile) */}
+          {/* BRANDS Section (Mobile) */}
           <section>
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-red-600 mb-4">
               Top Brands
@@ -172,8 +172,9 @@ export default function Navbar() {
                 <Link
                   key={brand.id}
                   onClick={closeMobile}
-                  href={`/shop?brand=${formatSlug(brand.name)}`}
-                  className="px-3 py-1 bg-gray-100 rounded-full text-xs font-bold uppercase"
+                  // ✅ MATCHES DESKTOP: /brands/[slug]
+                  href={`/brands/${formatSlug(brand.name)}`}
+                  className="px-3 py-1 bg-gray-100 rounded-full text-[10px] font-bold uppercase tracking-tight text-gray-800"
                 >
                   {brand.name}
                 </Link>
@@ -181,18 +182,19 @@ export default function Navbar() {
             </div>
           </section>
 
-          {/* Men's (Mobile) */}
-          <section>
+          {/* MEN'S Section (Mobile) */}
+          <section className="pt-4 border-t border-gray-100">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">
               Men's Collection
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-y-4 gap-x-2">
               {dbCategories.map((cat) => (
                 <Link
                   key={cat.id}
                   onClick={closeMobile}
-                  href={`/shop/male?category=${formatSlug(cat.name)}`}
-                  className="text-sm font-bold capitalize text-gray-700"
+                  // ✅ MATCHES DESKTOP: /categories/male/[slug]
+                  href={`/categories/male/${formatSlug(cat.name)}`}
+                  className="text-sm font-bold capitalize text-gray-700 hover:text-black"
                 >
                   {cat.name}
                 </Link>
@@ -200,23 +202,35 @@ export default function Navbar() {
             </div>
           </section>
 
-          {/* Women's (Mobile) */}
+          {/* WOMEN'S Section (Mobile) */}
           <section className="pt-4 border-t border-gray-100">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">
               Women's Collection
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-y-4 gap-x-2">
               {dbCategories.map((cat) => (
                 <Link
                   key={cat.id}
                   onClick={closeMobile}
-                  href={`/shop/female?category=${formatSlug(cat.name)}`}
-                  className="text-sm font-bold capitalize text-gray-700"
+                  // ✅ MATCHES DESKTOP: /categories/female/[slug]
+                  href={`/categories/female/${formatSlug(cat.name)}`}
+                  className="text-sm font-bold capitalize text-gray-700 hover:text-black"
                 >
                   {cat.name}
                 </Link>
               ))}
             </div>
+          </section>
+
+          {/* Extra Link for Contact/Footer */}
+          <section className="pt-6 border-t border-gray-100">
+            <Link
+              href="/#footer"
+              onClick={closeMobile}
+              className="text-xs font-bold uppercase tracking-widest text-gray-400"
+            >
+              Contact & Support
+            </Link>
           </section>
         </div>
       )}
