@@ -20,7 +20,7 @@ export default function ProductCard({ product, priority = false }: Props) {
         e.preventDefault();
         setZoomedImages(product.images);
       }}
-      className="bg-white border border-gray-100 cursor-zoom-in group transition-all duration-300 hover:shadow-md hover:border-gray-300 overflow-hidden"
+      className="bg-white border border-gray-300 cursor-zoom-in group transition-all duration-300 hover:shadow-md hover:border-gray-300 overflow-hidden"
     >
       <div className="relative w-full aspect-square overflow-hidden bg-gray-100">
         {/* 2. Defensive rendering: Only render Image if displayImage isn't an empty string */}
