@@ -274,7 +274,7 @@
 //     ...doc.data(),
 //   })) as { id: string; name: string }[];
 // };
-import { storage, db } from "./firebase";
+
 import {
   serverTimestamp,
   addDoc,
@@ -291,6 +291,7 @@ import {
   QueryDocumentSnapshot,
   onSnapshot,
   where,
+  setDoc,
 } from "firebase/firestore";
 import { Product } from "@/types";
 import {
@@ -299,6 +300,7 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
+import { db, storage } from "./firebase";
 
 const COLLECTION_NAME = "products";
 
@@ -307,6 +309,7 @@ const COLLECTION_NAME = "products";
 export interface FirestoreItem {
   id: string;
   name: string;
+  gender: "male" | "female";
   createdAt?: Date;
 }
 
@@ -336,11 +339,51 @@ export const subscribeToCollection = (
   });
 };
 
-export const addItem = async (collectionName: string, name: string) => {
-  await addDoc(collection(db, collectionName), {
-    name: name.trim(),
-    createdAt: new Date(),
+export const uploadSliderImage = async (slot: number, file: File) => {
+  const storageRef = ref(storage, `slider/slot_${slot}`);
+
+  // 1. Upload to Storage
+  await uploadBytes(storageRef, file);
+  const downloadURL = await getDownloadURL(storageRef);
+
+  // 2. Update Firestore
+  const sliderRef = doc(db, "settings", "slider");
+  await setDoc(
+    sliderRef,
+    {
+      [`image${slot}`]: downloadURL,
+    },
+    { merge: true }
+  );
+
+  return downloadURL;
+};
+
+// Deletes the image URL from Firestore (Storage cleanup optional but recommended)
+export const deleteSliderImage = async (slot: number) => {
+  const sliderRef = doc(db, "settings", "slider");
+  await updateDoc(sliderRef, {
+    [`image${slot}`]: null,
   });
+};
+
+export const addItem = async (
+  collectionName: string,
+  name: string,
+  gender?: "male" | "female" // Add the '?' here
+) => {
+  // Create the base data object
+  const data: any = {
+    name: name.trim(),
+    createdAt: serverTimestamp(),
+  };
+
+  // Only add the gender field if it was actually provided
+  if (gender) {
+    data.gender = gender;
+  }
+
+  await addDoc(collection(db, collectionName), data);
 };
 
 export const deleteItem = async (collectionName: string, id: string) => {
