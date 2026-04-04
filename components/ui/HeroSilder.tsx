@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 
 const SLIDES = [
-  { id: 1, src: "/a1.png", alt: "New Spring Collection" },
-  { id: 2, src: "/a2.png", alt: "Minimalist Essentials" },
-  { id: 3, src: "/a3.png", alt: "Limited Edition Drop" },
+  { id: 1, src: "/a1.jpeg", alt: "New Spring Collection" },
+  { id: 2, src: "/a2.jpeg", alt: "Minimalist Essentials" },
+  { id: 3, src: "/a3.jpeg", alt: "Limited Edition Drop" },
 ];
 
 export default function HeroSlider() {

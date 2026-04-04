@@ -57,7 +57,7 @@ export default function Navbar() {
             onMouseLeave={() => setActiveMenu(null)}
           >
             <button className={linkStyle}>
-              Men <span className="text-[10px] opacity-30">▼</span>
+              Erkaklar <span className="text-[10px] opacity-30">▼</span>
             </button>
             {activeMenu === "male" && (
               <div className={dropdownStyle}>
@@ -83,7 +83,7 @@ export default function Navbar() {
             onMouseLeave={() => setActiveMenu(null)}
           >
             <button className={linkStyle}>
-              Women <span className="text-[10px] opacity-30">▼</span>
+              Ayollar <span className="text-[10px] opacity-30">▼</span>
             </button>
             {activeMenu === "female" && (
               <div className={dropdownStyle}>
@@ -109,7 +109,7 @@ export default function Navbar() {
             onMouseLeave={() => setActiveMenu(null)}
           >
             <button className={linkStyle}>
-              Brands <span className="text-[10px] opacity-30">▼</span>
+              Brand <span className="text-[10px] opacity-30">▼</span>
             </button>
             {activeMenu === "brands" && (
               <div className={dropdownStyle}>

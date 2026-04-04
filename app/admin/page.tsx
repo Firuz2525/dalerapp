@@ -1,6 +1,5 @@
 "use client";
 import { doc, onSnapshot } from "firebase/firestore";
-import { uploadSliderImage, deleteSliderImage } from "@/lib/firestore";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";

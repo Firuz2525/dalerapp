@@ -1,12 +1,9 @@
-import Link from "next/link";
 import {
   FaTelegramPlane,
-  FaFacebookF,
   FaInstagram,
   FaPhoneAlt,
   FaMapMarkerAlt,
 } from "react-icons/fa";
-import { SiLine } from "react-icons/si";
 
 export default function Footer() {
   // Style for social icons on dark background
@@ -25,18 +22,22 @@ export default function Footer() {
           {/* Brand & Message */}
           <div className="space-y-4">
             <h2 className="text-xl font-bold tracking-tight text-white">
-              Adidas
+              Tokyo<b className="text-red-600">Brands</b>
             </h2>
             <p className="text-sm leading-relaxed max-w-xs text-gray-400">
-              Yaponiyadan brend poyabzal va kiyimlarni kafolatlangan holda
-              yetkazib beramiz.{" "}
+              Yaponiyadan faqat original mahsulotlarni yetkazib beramiz. Ishonch
+              va sifat kafolatlanadi.
+            </p>
+            <p className="text-sm leading-relaxed max-w-xs text-gray-400">
+              Отправляем из Японии только оригинальные товары. Гарантия качества
+              и надежности.
             </p>
           </div>
 
           {/* Address & Phone */}
           <div className="space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500">
-              Contact Us
+              Contact
             </h3>
             <div className="space-y-3">
               <div className="flex items-start gap-3 text-sm">
@@ -56,7 +57,7 @@ export default function Footer() {
           {/* Social Media Links */}
           <div className="space-y-1">
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500">
-              Follow Our Channel
+              Kanalimiz
             </h3>
             <div className="flex items-center gap-2">
               <a
@@ -66,22 +67,6 @@ export default function Footer() {
                 aria-label="Telegram"
               >
                 <FaTelegramPlane size={20} />
-              </a>
-              <a
-                href="https://line.me/ti/p/yourid"
-                target="_blank"
-                className={socialLinkStyle}
-                aria-label="Line"
-              >
-                <SiLine size={20} />
-              </a>
-              <a
-                href="https://facebook.com/yourpage"
-                target="_blank"
-                className={socialLinkStyle}
-                aria-label="Facebook"
-              >
-                <FaFacebookF size={18} />
               </a>
               <a
                 href="https://www.instagram.com/tokyobrands?igsh=cDR5d3g0bWozbmIz&utm_source=qr"

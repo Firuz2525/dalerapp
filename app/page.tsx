@@ -7,6 +7,8 @@ import HeroSlider from "@/components/ui/HeroSilder";
 import Spinner from "@/components/ui/Spinner";
 import { getProductsPaginated } from "@/lib/firestore";
 import { Product } from "@/types";
+import { SiSpreadshirt } from "react-icons/si";
+import { HiOutlineChevronDown } from "react-icons/hi";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -82,12 +84,9 @@ export default function Home() {
       <main className="max-w-7xl p-4 md:p-8 mx-auto min-h-screen">
         {/* Header Section */}
         <div className="mb-10 border-b border-gray-100 pb-6">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            New Arrivals
+          <h1 className="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-gray-200 to-yellow-200">
+            Premium-class mahsulotlar
           </h1>
-          <p className="text-gray-500 mt-2 text-sm">
-            Explore our latest collection from Japan.
-          </p>
         </div>
 
         {/* Product Grid */}
@@ -120,25 +119,50 @@ export default function Home() {
             <button
               onClick={loadMore}
               disabled={loadingMore}
-              className="group relative px-10 py-4 bg-black text-white transition-all hover:bg-gray-800 disabled:opacity-30 active:scale-95"
+              className="flex flex-row items-center group relative px-7 py-2 bg-black text-white transition-all hover:bg-gray-800 disabled:opacity-30 active:scale-95"
             >
               <span
                 className={`text-[10px] font-black uppercase tracking-[0.3em] ${
                   loadingMore ? "opacity-0" : "opacity-100"
                 }`}
               >
-                Load More
+                Yuklash
               </span>
-
+              <HiOutlineChevronDown
+                className="text-yellow-600 animate-bounce mt-4"
+                size={30}
+              />
               {loadingMore && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                 </div>
               )}
             </button>
+            {/* <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="group relative px-10 py-4 bg-black text-white transition-all hover:bg-gray-800 disabled:opacity-30 active:scale-95"
+            >
+              <span
+                className={`flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] ${
+                  loadingMore ? "opacity-0" : "opacity-100"
+                }`}
+              >
+                Yana yuklash
+                <HiOutlineChevronDown
+                  className="text-yellow-600 group-hover:translate-y-1 transition-transform"
+                  size={18}
+                />
+              </span>
 
+              {loadingMore && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                </div>
+              )}
+            </button> */}
             <p className="text-[9px] text-gray-400 uppercase tracking-[0.2em] mt-6">
-              Showing {products.length} Products
+              Yana {products.length}ta Mahsulot
             </p>
           </div>
         )}

@@ -339,34 +339,6 @@ export const subscribeToCollection = (
   });
 };
 
-export const uploadSliderImage = async (slot: number, file: File) => {
-  const storageRef = ref(storage, `slider/slot_${slot}`);
-
-  // 1. Upload to Storage
-  await uploadBytes(storageRef, file);
-  const downloadURL = await getDownloadURL(storageRef);
-
-  // 2. Update Firestore
-  const sliderRef = doc(db, "settings", "slider");
-  await setDoc(
-    sliderRef,
-    {
-      [`image${slot}`]: downloadURL,
-    },
-    { merge: true }
-  );
-
-  return downloadURL;
-};
-
-// Deletes the image URL from Firestore (Storage cleanup optional but recommended)
-export const deleteSliderImage = async (slot: number) => {
-  const sliderRef = doc(db, "settings", "slider");
-  await updateDoc(sliderRef, {
-    [`image${slot}`]: null,
-  });
-};
-
 export const addItem = async (
   collectionName: string,
   name: string,
