@@ -305,6 +305,12 @@ import { db, storage } from "./firebase";
 const COLLECTION_NAME = "products";
 
 // --- INTERFACES ---
+export interface SliderImage {
+  id: string;
+  url: string; // Add this!
+  slot: string; // Add this!
+  updatedAt?: any;
+}
 
 export interface FirestoreItem {
   id: string;
@@ -509,4 +515,56 @@ export const getCategories = async () => {
     id: doc.id,
     ...doc.data(),
   })) as { id: string; name: string }[];
+};
+
+export const updateSliderSlot = async (slotId: string, file: File) => {
+  const storageRef = ref(storage, `slider/${slotId}_${Date.now()}`);
+  await uploadBytes(storageRef, file);
+  const url = await getDownloadURL(storageRef);
+
+  // Use setDoc with the specific slotId to overwrite/create
+  await setDoc(doc(db, "slider_images", slotId), {
+    url,
+    slot: slotId,
+    updatedAt: new Date(),
+  });
+};
+
+export interface SliderImage {
+  id: string;
+  url: string; // The URL stored in the document
+}
+
+export const deleteSliderSlot = async (imageItem: SliderImage) => {
+  try {
+    // 1. Delete the actual file from Firebase Storage
+    if (imageItem.url) {
+      const imageRef = ref(storage, imageItem.url);
+      await deleteObject(imageRef);
+    }
+
+    // 2. Delete the metadata record from Firestore
+    await deleteDoc(doc(db, "slider_images", imageItem.id));
+
+    console.log(
+      "Successfully deleted both the image file and the database record."
+    );
+  } catch (error) {
+    console.error("Error during deletion:", error);
+    throw error;
+  }
+};
+
+export const subscribeToSlider = (callback: (items: SliderImage[]) => void) => {
+  // We use the "slider_images" collection you asked about earlier
+  const q = query(collection(db, "slider_images"), orderBy("slot", "asc"));
+
+  return onSnapshot(q, (snapshot) => {
+    const items = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as SliderImage[];
+
+    callback(items);
+  });
 };

@@ -20,6 +20,7 @@ import Spinner from "@/components/ui/Spinner";
 // Constants & Types
 import { Product, CreateProduct } from "@/types";
 import { db } from "@/lib/firebase";
+import SliderManagement from "@/components/ui/sliderManagement";
 
 export default function AdminPage() {
   const { user, loading: authLoading } = useAuth();
@@ -128,7 +129,11 @@ export default function AdminPage() {
       }
     }
   };
+  const [activeTab, setActiveTab] = useState<string | null>(null);
 
+  const toggleTab = (tabName: string) => {
+    setActiveTab(activeTab === tabName ? null : tabName);
+  };
   if (authLoading)
     return (
       <div className="h-screen flex items-center justify-center">
@@ -140,20 +145,64 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <AdminHeader />
-      <div className="p-8 space-y-8 bg-white border-b border-gray-100">
-        <ManagementSection
-          title="Categories"
-          collectionName="categories"
-          placeholder="e.g. Sneakers"
-          isCategorySection={true} // Special flag for gendered buttons
+      {/* ADMIN NAVIGATION BAR */}
+      <div className="bg-white border-b border-gray-200 px-8 py-3 flex gap-3 sticky top-0 z-20 shadow-sm overflow-x-auto">
+        <TabButton
+          label="Slider"
+          active={activeTab === "slider"}
+          onClick={() => toggleTab("slider")}
         />
-        <ManagementSection
-          title="Brands"
-          collectionName="brands"
-          placeholder="e.g. Nike"
-          isCategorySection={false}
+        <TabButton
+          label="Categories"
+          active={activeTab === "categories"}
+          onClick={() => toggleTab("categories")}
+        />
+        <TabButton
+          label="Brands"
+          active={activeTab === "brands"}
+          onClick={() => toggleTab("brands")}
+        />
+        <div className="flex-1" /> {/* Spacer */}
+        <TabButton
+          label={`View All Products (${products.length})`}
+          active={activeTab === "products"}
+          onClick={() => toggleTab("products")}
+          variant="outline"
         />
       </div>
+
+      {/* TOP MANAGEMENT SECTIONS (Collapsible) */}
+      <div className="bg-white border-b border-gray-100">
+        {activeTab === "slider" && (
+          <div className="p-8">
+            <SliderManagement />
+          </div>
+        )}
+        {activeTab === "categories" && (
+          <div className="p-8">
+            <ManagementSection
+              title="Categories"
+              collectionName="categories"
+              placeholder="e.g. Sneakers"
+              isCategorySection
+            />
+          </div>
+        )}
+        {activeTab === "brands" && (
+          <div className="p-8">
+            <ManagementSection
+              title="Brands"
+              collectionName="brands"
+              placeholder="e.g. Nike"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* ALWAYS VISIBLE: ADD PRODUCT FORM */}
+      <main className="max-w-3xl mx-auto p-6 mt-10">
+        {/* ... Your Existing Add Product Form ... */}
+      </main>
 
       <main className="max-w-3xl mx-auto p-6 mt-10">
         <div className="bg-white rounded-xl border border-gray-100 p-8 shadow-sm">
@@ -296,7 +345,33 @@ export default function AdminPage() {
           </form>
         </div>
       </main>
+      {/* NEW SECTION: PRODUCT LIST BAR VIEW */}
+      {activeTab === "products" && (
+        <section className="max-w-5xl mx-auto p-6 mt-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-black uppercase tracking-tight">
+              Product Catalog
+            </h2>
+            <button
+              onClick={() => setActiveTab(null)}
+              className="text-xs text-gray-400 hover:text-black"
+            >
+              Close List ✕
+            </button>
+          </div>
 
+          <div className="space-y-2">
+            {products.map((product) => (
+              <ProductBarRow
+                key={product.id}
+                product={product}
+                isDeleting={deletingId === product.id}
+                onDelete={() => handleDelete(product)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
       {showToast && <Toast message="Product added successfully!" />}
       {showDelToast && <Toast message="Product deleted successfully!" />}
     </div>
@@ -455,6 +530,110 @@ function ManagementSection({
             </button>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function TabButton({ label, active, onClick, variant = "default" }: any) {
+  const baseStyles =
+    "px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap";
+  const activeStyles = active
+    ? "bg-black text-white shadow-md scale-105"
+    : "bg-gray-100 text-gray-500 hover:bg-gray-200";
+  const outlineStyles =
+    variant === "outline" && !active
+      ? "border border-gray-200 text-gray-600 bg-transparent hover:bg-black hover:text-white"
+      : "";
+
+  return (
+    <button
+      onClick={onClick}
+      className={`${baseStyles} ${activeStyles} ${outlineStyles}`}
+    >
+      {label}
+    </button>
+  );
+}
+function ProductBarRow({
+  product,
+  onDelete,
+  isDeleting,
+}: {
+  product: Product;
+  onDelete: () => void;
+  isDeleting: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-4 bg-white p-3 rounded-xl border border-gray-100 hover:border-gray-300 transition-all shadow-sm group">
+      {/* Tiny Thumbnail */}
+      <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+        {product.images && product.images[0] ? (
+          <img
+            src={product.images[0]}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">
+            No Img
+          </div>
+        )}
+      </div>
+
+      {/* Info Block */}
+      <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
+        <div>
+          <p className="text-sm font-bold text-gray-900 truncate">
+            {product.name}
+          </p>
+          <p className="text-[10px] text-gray-400 uppercase tracking-widest">
+            {product.brand}
+          </p>
+        </div>
+
+        <div className="hidden md:block">
+          <span
+            className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase ${
+              product.gender === "male"
+                ? "bg-blue-50 text-blue-600"
+                : "bg-pink-50 text-pink-600"
+            }`}
+          >
+            {product.gender}
+          </span>
+        </div>
+
+        <div className="text-right md:text-left">
+          <p className="text-sm font-black text-gray-900">${product.price}</p>
+        </div>
+
+        {/* Delete Button */}
+        <div className="flex justify-end">
+          <button
+            onClick={onDelete}
+            disabled={isDeleting}
+            className="p-2 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+          >
+            {isDeleting ? (
+              <Spinner />
+            ) : (
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
