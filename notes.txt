@@ -1,15 +1,20 @@
+move to yetkazildi as partya
+move to topshirildi table and delete manual image from
+
+download it in excel
+
+
+
+6. find by id and edit/add info and send to shipping
+try (send the product details to telegram account)
+-------------------------------------------------------
+
+
+
+
 
 /////////////////////////////////
  
-category array male and female
-brand array
-slider image upload
-
-
-image sizes script?
-calculations app?
-answer the telegram msg
-
 
 service cloud.firestore {
 match /databases/{database}/documents {
@@ -37,3 +42,5 @@ match /databases/{database}/documents {
     }
   }
 }
+
+now let's put a toggle button next to "live mode" where let's add a form which should have product price input and deposit price input and description input to add a description to an order's detail and to edit its price (in case there might be negotitation) and add the deposit price of an order, just above the submit button write the client's info and product name, brand and small image. So let's make a icon button for each product detail, what i want is that, when i press single product's button, it should take the client info along with the product details like prices and so on, and put it in corresponding inputs, to edit it price, add deposit price and add description. After which, we need to submit the order with its extra info along with its client info to the shipping status db in firestore and delete the current product from the orders. and we fetch them again in this page and show it with shipping toggle button next to live mode. And what i want there too is that when i change the products from pending to shipping, 

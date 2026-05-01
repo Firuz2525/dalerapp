@@ -19,7 +19,6 @@ import Spinner from "@/components/ui/Spinner";
 
 // Constants & Types
 import { Product, CreateProduct } from "@/types";
-import { db } from "@/lib/firebase";
 import SliderManagement from "@/components/ui/sliderManagement";
 
 export default function AdminPage() {
@@ -44,6 +43,19 @@ export default function AdminPage() {
     sizes: [] as string[],
   });
 
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, authLoading, router]);
+  useEffect(() => {
+    // If user is null, stop here and don't check the email yet
+    if (!user) return;
+
+    if (user.email !== "daler@gmail.com") {
+      router.push("/admin/orders");
+    }
+  }, [user, router]);
   // Real-time listeners for the Product Form selects
   useEffect(() => {
     const unsubBrands = subscribeToCollection("brands", setDbBrands);
@@ -61,12 +73,6 @@ export default function AdminPage() {
     };
     loadData();
   }, []);
-
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
-    }
-  }, [user, authLoading, router]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -143,238 +149,240 @@ export default function AdminPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <AdminHeader />
-      {/* ADMIN NAVIGATION BAR */}
-      <div className="bg-white border-b border-gray-200 px-8 py-3 flex gap-3 sticky top-0 z-20 shadow-sm overflow-x-auto">
-        <TabButton
-          label="Slider"
-          active={activeTab === "slider"}
-          onClick={() => toggleTab("slider")}
-        />
-        <TabButton
-          label="Categories"
-          active={activeTab === "categories"}
-          onClick={() => toggleTab("categories")}
-        />
-        <TabButton
-          label="Brands"
-          active={activeTab === "brands"}
-          onClick={() => toggleTab("brands")}
-        />
-        <div className="flex-1" /> {/* Spacer */}
-        <TabButton
-          label={`View All Products (${products.length})`}
-          active={activeTab === "products"}
-          onClick={() => toggleTab("products")}
-          variant="outline"
-        />
-      </div>
+    user.email === "daler@gmail.com" && (
+      <div className="min-h-screen bg-gray-50 pb-20">
+        <AdminHeader />
+        {/* ADMIN NAVIGATION BAR */}
+        <div className="bg-white border-b border-gray-200 px-8 py-3 flex gap-3 sticky top-0 z-20 shadow-sm overflow-x-auto">
+          <TabButton
+            label="Slider"
+            active={activeTab === "slider"}
+            onClick={() => toggleTab("slider")}
+          />
+          <TabButton
+            label="Categories"
+            active={activeTab === "categories"}
+            onClick={() => toggleTab("categories")}
+          />
+          <TabButton
+            label="Brands"
+            active={activeTab === "brands"}
+            onClick={() => toggleTab("brands")}
+          />
+          <div className="flex-1" /> {/* Spacer */}
+          <TabButton
+            label={`View All Products (${products.length})`}
+            active={activeTab === "products"}
+            onClick={() => toggleTab("products")}
+            variant="outline"
+          />
+        </div>
 
-      {/* TOP MANAGEMENT SECTIONS (Collapsible) */}
-      <div className="bg-white border-b border-gray-100">
-        {activeTab === "slider" && (
-          <div className="p-8">
-            <SliderManagement />
-          </div>
-        )}
-        {activeTab === "categories" && (
-          <div className="p-8">
-            <ManagementSection
-              title="Categories"
-              collectionName="categories"
-              placeholder="e.g. Sneakers"
-              isCategorySection
-            />
-          </div>
-        )}
-        {activeTab === "brands" && (
-          <div className="p-8">
-            <ManagementSection
-              title="Brands"
-              collectionName="brands"
-              placeholder="e.g. Nike"
-            />
-          </div>
-        )}
-      </div>
-
-      {/* ALWAYS VISIBLE: ADD PRODUCT FORM */}
-      <main className="max-w-3xl mx-auto p-6 mt-10">
-        {/* ... Your Existing Add Product Form ... */}
-      </main>
-
-      <main className="max-w-3xl mx-auto p-6 mt-10">
-        <div className="bg-white rounded-xl border border-gray-100 p-8 shadow-sm">
-          <header className="mb-8 border-b border-gray-100 pb-4">
-            <h1 className="text-2xl font-black uppercase tracking-tight text-gray-900">
-              Add New Product
-            </h1>
-          </header>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
-                label="Product Name"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                required
-              />
-              <InputField
-                label="Price ($)"
-                name="price"
-                type="number"
-                value={form.price}
-                onChange={handleChange}
-                required
+        {/* TOP MANAGEMENT SECTIONS (Collapsible) */}
+        <div className="bg-white border-b border-gray-100">
+          {activeTab === "slider" && (
+            <div className="p-8">
+              <SliderManagement />
+            </div>
+          )}
+          {activeTab === "categories" && (
+            <div className="p-8">
+              <ManagementSection
+                title="Categories"
+                collectionName="categories"
+                placeholder="e.g. Sneakers"
+                isCategorySection
               />
             </div>
+          )}
+          {activeTab === "brands" && (
+            <div className="p-8">
+              <ManagementSection
+                title="Brands"
+                collectionName="brands"
+                placeholder="e.g. Nike"
+              />
+            </div>
+          )}
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <label className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  Brand
-                </label>
-                <select
-                  name="brand"
-                  value={form.brand}
+        {/* ALWAYS VISIBLE: ADD PRODUCT FORM */}
+        <main className="max-w-3xl mx-auto p-6 mt-10">
+          {/* ... Your Existing Add Product Form ... */}
+        </main>
+
+        <main className="max-w-3xl mx-auto p-6 mt-10">
+          <div className="bg-white rounded-xl border border-gray-100 p-8 shadow-sm">
+            <header className="mb-8 border-b border-gray-100 pb-4">
+              <h1 className="text-2xl font-black uppercase tracking-tight text-gray-900">
+                Add New Product
+              </h1>
+            </header>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InputField
+                  label="Product Name"
+                  name="name"
+                  value={form.name}
                   onChange={handleChange}
-                  className="w-full border border-gray-200 p-2.5 rounded-lg text-sm outline-none"
                   required
-                >
-                  <option value="">Select Brand</option>
-                  {dbBrands.map((b) => (
-                    <option key={b.id} value={b.name}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
+                />
+                <InputField
+                  label="Price ($)"
+                  name="price"
+                  type="number"
+                  value={form.price}
+                  onChange={handleChange}
+                  required
+                />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  Category
-                </label>
-                <select
-                  name="category"
-                  value={form.category}
-                  onChange={handleChange}
-                  className="w-full border border-gray-200 p-2.5 rounded-lg text-sm outline-none"
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {dbCategories
-                    .filter((c: any) => c.gender === form.gender) // Filters based on selected gender above
-                    .map((c) => (
-                      <option key={c.id} value={c.name}>
-                        {c.name}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                    Brand
+                  </label>
+                  <select
+                    name="brand"
+                    value={form.brand}
+                    onChange={handleChange}
+                    className="w-full border border-gray-200 p-2.5 rounded-lg text-sm outline-none"
+                    required
+                  >
+                    <option value="">Select Brand</option>
+                    {dbBrands.map((b) => (
+                      <option key={b.id} value={b.name}>
+                        {b.name}
                       </option>
                     ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                    Category
+                  </label>
+                  <select
+                    name="category"
+                    value={form.category}
+                    onChange={handleChange}
+                    className="w-full border border-gray-200 p-2.5 rounded-lg text-sm outline-none"
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {dbCategories
+                      .filter((c: any) => c.gender === form.gender) // Filters based on selected gender above
+                      .map((c) => (
+                        <option key={c.id} value={c.name}>
+                          {c.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                  Gender
+                </label>
+                <select
+                  name="gender"
+                  value={form.gender}
+                  onChange={handleChange}
+                  className="w-full border border-gray-200 p-2.5 rounded-lg text-sm outline-none"
+                >
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
                 </select>
               </div>
-            </div>
 
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                Gender
-              </label>
-              <select
-                name="gender"
-                value={form.gender}
-                onChange={handleChange}
-                className="w-full border border-gray-200 p-2.5 rounded-lg text-sm outline-none"
-              >
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-            </div>
-
-            <div className="space-y-4">
-              <label className="text-sm font-bold uppercase tracking-widest text-gray-400">
-                Product Gallery ({imageFiles.length})
-              </label>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageChange}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-black file:text-white"
-              />
-              <div className="grid grid-cols-3 gap-2 mt-4">
-                {imageFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group"
-                  >
-                    <img
-                      src={URL.createObjectURL(file)}
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-1 right-1 bg-white/80 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              <div className="space-y-4">
+                <label className="text-sm font-bold uppercase tracking-widest text-gray-400">
+                  Product Gallery ({imageFiles.length})
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-black file:text-white"
+                />
+                <div className="grid grid-cols-3 gap-2 mt-4">
+                  {imageFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group"
                     >
-                      <svg
-                        className="w-4 h-4 text-red-600"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
+                      <img
+                        src={URL.createObjectURL(file)}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-1 right-1 bg-white/80 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        <path
-                          d="M6 18L18 6M6 6l12 12"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
+                        <svg
+                          className="w-4 h-4 text-red-600"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M6 18L18 6M6 6l12 12"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
+
+              <div className="pt-4">
+                {loading ? (
+                  <Spinner />
+                ) : (
+                  <Button type="submit">Add to Catalog</Button>
+                )}
+              </div>
+            </form>
+          </div>
+        </main>
+        {/* NEW SECTION: PRODUCT LIST BAR VIEW */}
+        {activeTab === "products" && (
+          <section className="max-w-5xl mx-auto p-6 mt-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-black uppercase tracking-tight">
+                Product Catalog
+              </h2>
+              <button
+                onClick={() => setActiveTab(null)}
+                className="text-xs text-gray-400 hover:text-black"
+              >
+                Close List ✕
+              </button>
             </div>
 
-            <div className="pt-4">
-              {loading ? (
-                <Spinner />
-              ) : (
-                <Button type="submit">Add to Catalog</Button>
-              )}
+            <div className="space-y-2">
+              {products.map((product) => (
+                <ProductBarRow
+                  key={product.id}
+                  product={product}
+                  isDeleting={deletingId === product.id}
+                  onDelete={() => handleDelete(product)}
+                />
+              ))}
             </div>
-          </form>
-        </div>
-      </main>
-      {/* NEW SECTION: PRODUCT LIST BAR VIEW */}
-      {activeTab === "products" && (
-        <section className="max-w-5xl mx-auto p-6 mt-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-black uppercase tracking-tight">
-              Product Catalog
-            </h2>
-            <button
-              onClick={() => setActiveTab(null)}
-              className="text-xs text-gray-400 hover:text-black"
-            >
-              Close List ✕
-            </button>
-          </div>
-
-          <div className="space-y-2">
-            {products.map((product) => (
-              <ProductBarRow
-                key={product.id}
-                product={product}
-                isDeleting={deletingId === product.id}
-                onDelete={() => handleDelete(product)}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-      {showToast && <Toast message="Product added successfully!" />}
-      {showDelToast && <Toast message="Product deleted successfully!" />}
-    </div>
+          </section>
+        )}
+        {showToast && <Toast message="Product added successfully!" />}
+        {showDelToast && <Toast message="Product deleted successfully!" />}
+      </div>
+    )
   );
 }
 

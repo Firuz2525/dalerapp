@@ -17,7 +17,7 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/admin"); // Redirect to admin after success
+      router.push("/orders"); // Redirect to admin after success
     } catch (err: any) {
       setError("Invalid email or password");
     }
@@ -51,6 +51,88 @@ export default function LoginPage() {
   );
 }
 
+// "use client";
+
+// import { useState } from "react";
+// import { createUserWithEmailAndPassword } from "firebase/auth";
+// import { auth, db } from "@/lib/firebase";
+// import { doc, setDoc } from "firebase/firestore";
+// import { useAuth } from "@/context/AuthContext";
+// import toast from "react-hot-toast";
+
+// export default function StaffManager() {
+//   const { role } = useAuth();
+//   const [email, setEmail] = useState("");
+//   const [password, setPassword] = useState("");
+//   const [loading, setLoading] = useState(false);
+
+//   // Block non-admins from even seeing the logic
+//   // if (role !== "admin") return null;
+
+//   const handleCreateStaff = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     setLoading(true);
+
+//     try {
+//       // 1. Create the user in Firebase Auth
+//       const userCredential = await createUserWithEmailAndPassword(
+//         auth,
+//         email,
+//         password
+//       );
+//       const newUser = userCredential.user;
+
+//       // 2. Create the role document in Firestore
+//       await setDoc(doc(db, "users", newUser.uid), {
+//         email: newUser.email,
+//         role: "staff", // Force role as staff
+//         createdAt: new Date().toISOString(),
+//       });
+
+//       toast.success("Yangi xodim muvaffaqiyatli qo'shildi!");
+//       setEmail("");
+//       setPassword("");
+//     } catch (err: any) {
+//       console.error(err);
+//       toast.error("Xatolik: " + err.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="mt-10 p-6 border-4 border-black bg-gray-50">
+//       <h2 className="font-black uppercase text-lg mb-4">
+//         Yangi Xodim Qo'shish
+//       </h2>
+//       <form onSubmit={handleCreateStaff} className="space-y-4">
+//         <input
+//           type="email"
+//           placeholder="Xodim emaili"
+//           className="w-full p-2 border-2 border-black"
+//           value={email}
+//           onChange={(e) => setEmail(e.target.value)}
+//           required
+//         />
+//         <input
+//           type="password"
+//           placeholder="Parol"
+//           className="w-full p-2 border-2 border-black"
+//           value={password}
+//           onChange={(e) => setPassword(e.target.value)}
+//           required
+//         />
+//         <button
+//           type="submit"
+//           disabled={loading}
+//           className="w-full bg-black text-white py-3 font-black uppercase hover:bg-zinc-800 disabled:bg-gray-400"
+//         >
+//           {loading ? "YUKLANMOQDA..." : "XODIMNI RO'YXATDAN O'TKAZISH"}
+//         </button>
+//       </form>
+//     </div>
+//   );
+// }
 // import InputField from "@/components/ui/InputField";
 // import Button from "@/components/ui/Button";
 

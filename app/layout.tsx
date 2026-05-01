@@ -4,6 +4,8 @@ import Footer from "@/components/ui/Footer";
 import { ZoomProvider } from "@/context/ZoomContext";
 import HeroSlider from "@/components/ui/HeroSilder";
 import { AuthProvider } from "@/context/AuthContext";
+import { Toaster } from "react-hot-toast";
+import CartDrawer from "@/components/cart/CartDrawer";
 export const metadata = {
   title: "E-Commerce App",
   description: "Modern e-commerce built with Next.js",
@@ -20,10 +22,11 @@ export default function RootLayout({
         {/* min-h-screen ensures the page is at least the height of the window */}
         <div className="flex flex-col min-h-screen">
           <ZoomProvider>
-            {" "}
             <Navbar />
             {/* flex-grow pushes the footer to the bottom if content is short */}
             <AuthProvider>
+              <Toaster position="bottom-right" reverseOrder={false} />
+              <CartDrawer />
               <main className="flex-grow">{children}</main>
             </AuthProvider>
             <Footer />

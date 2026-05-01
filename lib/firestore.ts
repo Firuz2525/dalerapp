@@ -381,6 +381,54 @@ export const addProduct = async (product: Omit<Product, "id">) => {
 /**
  * Optimized Pagination supporting Gender, Category, and Brand filters
  */
+// export const getProductsPaginated = async ({
+//   lastVisible = null,
+//   gender,
+//   category,
+//   brand,
+//   pageSize = 10,
+// }: GetProductsPaginatedOptions = {}) => {
+//   const productsRef = collection(db, "products");
+
+//   let constraints: any[] = [orderBy("createdAt", "desc")];
+
+//   if (gender) {
+//     // Matches specific gender or items marked as unisex
+//     constraints.push(where("gender", "in", [gender.toLowerCase(), "unisex"]));
+//   }
+
+//   if (category) {
+//     constraints.push(where("category", "==", category));
+//   }
+
+//   if (brand) {
+//     constraints.push(where("brand", "==", brand));
+//   }
+
+//   if (lastVisible) {
+//     constraints.push(startAfter(lastVisible));
+//   }
+//   constraints.push(limit(pageSize));
+
+//   const q = query(productsRef, ...constraints);
+//   const querySnapshot = await getDocs(q);
+
+//   const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1] || null;
+
+//   const products = querySnapshot.docs.map((doc) => {
+//     const data = doc.data();
+//     return {
+//       ...(data as Omit<Product, "id">),
+//       id: doc.id,
+//       // Convert Timestamp to ISO String for Next.js serialization
+//       createdAt: data.createdAt?.toDate
+//         ? data.createdAt.toDate().toISOString()
+//         : null,
+//     } as Product;
+//   });
+
+//   return { products, lastDoc };
+// };
 export const getProductsPaginated = async ({
   lastVisible = null,
   gender,
@@ -408,6 +456,7 @@ export const getProductsPaginated = async ({
   if (lastVisible) {
     constraints.push(startAfter(lastVisible));
   }
+
   constraints.push(limit(pageSize));
 
   const q = query(productsRef, ...constraints);
@@ -417,10 +466,19 @@ export const getProductsPaginated = async ({
 
   const products = querySnapshot.docs.map((doc) => {
     const data = doc.data();
+
     return {
-      ...(data as Omit<Product, "id">),
+      // 1. Fallback: Initialize with Firestore Document ID
       id: doc.id,
-      // Convert Timestamp to ISO String for Next.js serialization
+
+      // 2. Priority: Spread your data.
+      // Since your data now contains the UUID 'id', it will overwrite doc.id.
+      ...(data as any),
+
+      // 3. Metadata: Keep the Firestore Doc ID in docId for backend operations
+      docId: doc.id,
+
+      // 4. Formatting: Convert Timestamp to ISO String for serialization
       createdAt: data.createdAt?.toDate
         ? data.createdAt.toDate().toISOString()
         : null,
@@ -429,7 +487,6 @@ export const getProductsPaginated = async ({
 
   return { products, lastDoc };
 };
-
 /**
  * Standard fetch (Updated to fix the Plain Object/Timestamp error)
  */

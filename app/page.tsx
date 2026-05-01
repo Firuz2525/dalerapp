@@ -7,7 +7,6 @@ import HeroSlider from "@/components/ui/HeroSilder";
 import Spinner from "@/components/ui/Spinner";
 import { getProductsPaginated } from "@/lib/firestore";
 import { Product } from "@/types";
-import { SiSpreadshirt } from "react-icons/si";
 import { HiOutlineChevronDown } from "react-icons/hi";
 
 export default function Home() {
@@ -68,7 +67,7 @@ export default function Home() {
       setLoadingMore(false);
     }
   };
-
+  console.log(products);
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -85,7 +84,7 @@ export default function Home() {
         {/* Header Section */}
         <div className="mb-10 border-b border-gray-100 pb-6">
           <h1 className="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-gray-200 to-yellow-200">
-            Premium-class mahsulotlar
+            Premium-Class Mahsulotlar
           </h1>
         </div>
 
