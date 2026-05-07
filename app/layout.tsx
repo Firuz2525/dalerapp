@@ -22,9 +22,9 @@ export default function RootLayout({
         {/* min-h-screen ensures the page is at least the height of the window */}
         <div className="flex flex-col min-h-screen">
           <ZoomProvider>
-            <Navbar />
             {/* flex-grow pushes the footer to the bottom if content is short */}
             <AuthProvider>
+              <Navbar />
               <Toaster position="bottom-right" reverseOrder={false} />
               <CartDrawer />
               <main className="flex-grow">{children}</main>

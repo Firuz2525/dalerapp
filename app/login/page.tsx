@@ -17,7 +17,7 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/orders"); // Redirect to admin after success
+      router.push("/admin/orders"); // Redirect to admin after success
     } catch (err: any) {
       setError("Invalid email or password");
     }

@@ -17,6 +17,7 @@ export default function OrderForm() {
     social: "", // Instagram/Telegram
     city: "",
     address: "",
+    size: "",
   });
 
   // Load from localStorage on mount
@@ -96,6 +97,7 @@ export default function OrderForm() {
           productQuantity: item.quantity,
           productThumbnail: item.images?.[0] || "/placeholder.jpg",
           productId: item.id,
+          productBts: "",
 
           // Metadata
           status: "pending",
@@ -144,6 +146,14 @@ export default function OrderForm() {
         onChange={handleChange}
         className={inputClass}
         autoComplete="tel"
+      />
+      <input
+        name="size"
+        placeholder="o'lcham"
+        value={formData.size}
+        onChange={handleChange}
+        className={inputClass}
+        autoComplete="size"
       />
       <input
         name="social"

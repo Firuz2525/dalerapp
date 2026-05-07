@@ -15,6 +15,7 @@ import {
   setDoc,
   limit,
   where,
+  updateDoc,
 } from "firebase/firestore";
 import {
   ref,
@@ -29,6 +30,7 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import * as XLSX from "xlsx";
 import { useRouter } from "next/navigation";
+import LogoutButton from "@/components/ui/logout";
 
 interface ProductOrder {
   id: string; // This is the Firestore Document ID
@@ -38,6 +40,7 @@ interface ProductOrder {
     phone: string;
     city: string;
     address: string;
+    size: string;
     social?: string;
   };
   productName: string;
@@ -45,6 +48,7 @@ interface ProductOrder {
   productQuantity: number;
   productThumbnail: string;
   productBrand?: string;
+  productBts: string;
   localDate?: string;
   deposit?: number;
   totalRemaining?: number;
@@ -57,7 +61,14 @@ interface ProductOrder {
 
 export default function AdminOrders() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+
+  const {
+    user,
+    isAdmin,
+    isStaff,
+    isAuthorized,
+    loading: authLoading,
+  } = useAuth();
 
   const { setZoomedImages } = useZoom();
 
@@ -84,6 +95,7 @@ export default function AdminOrders() {
     city: "",
     brand: "",
     productName: "",
+    size: "",
     price: 0,
     quantity: 1,
     imageFile: null as File | null,
@@ -95,6 +107,16 @@ export default function AdminOrders() {
     deposit: 0,
     description: "",
   });
+  const displayData =
+    view === "orders" && isAdmin
+      ? orders
+      : view === "shipping"
+      ? shippingItems
+      : view === "completed"
+      ? completedItems
+      : view === "delivered"
+      ? deliveredItems
+      : [];
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -196,12 +218,14 @@ export default function AdminOrders() {
           social: manualForm.telegram,
           address: manualForm.address,
           city: manualForm.city,
+          size: manualForm.size,
         },
         productName: manualForm.productName,
         productBrand: manualForm.brand,
         productPrice: manualForm.price,
         productQuantity: manualForm.quantity,
         productThumbnail: downloadURL,
+        productBts: "",
         status: "pending",
         manual: true,
         createdAt: serverTimestamp(),
@@ -217,6 +241,7 @@ export default function AdminOrders() {
         address: "",
         city: "",
         brand: "",
+        size: "",
         productName: "",
         price: 0,
         quantity: 1,
@@ -254,25 +279,46 @@ export default function AdminOrders() {
     }
   };
 
-  const handleBatchMarkAsShipped = async () => {
-    if (shippingItems.length === 0) return;
-    if (!window.confirm("Barchasini 'Yetkazildi' holatiga o'tkazish?")) return;
+  // const handleBatchMarkAsShipped = async () => {
+  //   if (shippingItems.length === 0) return;
+  //   if (!window.confirm("Barchasini 'Yetkazildi' holatiga o'tkazish?")) return;
+  //   try {
+  //     const batch = writeBatch(db);
+  //     shippingItems.forEach((item) => {
+  //       // Updating using the specific ID fetched from Firestore
+  //       const shippingRef = doc(db, "shipping", item.id);
+  //       batch.set(
+  //         shippingRef,
+  //         { status: "shipped", completedAt: serverTimestamp() },
+  //         { merge: true }
+  //       );
+  //     });
+  //     await batch.commit();
+  //     toast.success("Yangilandi!");
+  //     fetchData();
+  //   } catch (error) {
+  //     toast.error("Xatolik!");
+  //   }
+  // };
+  const handleMarkAsShipped = async (id: string) => {
+    if (
+      !window.confirm(
+        "Ushbu buyurtmani 'Yetkazilmoqda' holatiga o'tkazishni tasdiqlaysizmi?"
+      )
+    )
+      return;
     try {
-      const batch = writeBatch(db);
-      shippingItems.forEach((item) => {
-        // Updating using the specific ID fetched from Firestore
-        const shippingRef = doc(db, "shipping", item.id);
-        batch.set(
-          shippingRef,
-          { status: "shipped", completedAt: serverTimestamp() },
-          { merge: true }
-        );
+      const shippingRef = doc(db, "shipping", id);
+      await updateDoc(shippingRef, {
+        status: "shipped",
+        completedAt: serverTimestamp(),
       });
-      await batch.commit();
-      toast.success("Yangilandi!");
-      fetchData();
+
+      toast.success("Holat yangilandi!");
+      fetchData(); // Refresh the list
     } catch (error) {
-      toast.error("Xatolik!");
+      console.error("Update error:", error);
+      toast.error("Xatolik yuz berdi!");
     }
   };
   const handleMarkAsDelivered = async (order: ProductOrder) => {
@@ -324,14 +370,13 @@ export default function AdminOrders() {
   const exportAndWipeDelivered = async () => {
     if (
       !window.confirm(
-        "Barcha topshirilgan ma'lumotlarni Excelga yuklab olish va bazadan o'chirishni tasdiqlaysizmi? Bu amalni ortga qaytarib bo'lmaydi!"
+        "Barcha topshirilgan ma'lumotlarni Excelga yuklab olish va bazadan o'chirishni tasdiqlaysizmi?"
       )
     )
       return;
 
     setLoading(true);
     try {
-      // 1. Get all documents from delivered collection
       const deliveredRef = collection(db, "delivered");
       const snapshot = await getDocs(deliveredRef);
 
@@ -340,6 +385,8 @@ export default function AdminOrders() {
         setLoading(false);
         return;
       }
+
+      // 1. Map the main data
       const dataForExcel = snapshot.docs.map((doc) => {
         const item = doc.data();
         const total = item.productPrice * item.productQuantity;
@@ -354,6 +401,8 @@ export default function AdminOrders() {
           Mahsulot: item.productName,
           Brend: item.productBrand,
           Soni: item.productQuantity,
+          BTS: item.productBts,
+          Razmer: item.customer.size,
           Narxi: item.productPrice,
           "Zaklad ($)": item.deposit || 0,
           "Qolgan ($)": item.totalRemaining || 0,
@@ -361,46 +410,60 @@ export default function AdminOrders() {
           Status: "Topshirildi",
         };
       });
-      // 2. Format data for Excel
-      // const dataForExcel = snapshot.docs.map((doc) => {
-      //   const item = doc.data();
-      //   return {
-      //     ID: doc.id,
-      //     Sana:
-      //       item.deliveredAt?.toDate().toLocaleDateString() || item.localDate,
-      //     Mijoz: item.customer.name,
-      //     Telefon: item.customer.phone,
-      //     Shahar: item.customer.city,
-      //     Mahsulot: item.productName,
-      //     Brend: item.productBrand,
-      //     Soni: item.productQuantity,
-      //     Narxi: item.productPrice,
-      //     "Jami To'lov": item.productPrice * item.productQuantity,
-      //     Status: "Topshirildi",
-      //   };
-      // });
 
-      // 3. Create Excel Workbook
+      // 2. Calculate Totals
+      const totalZaklad = dataForExcel.reduce(
+        (acc, curr) => acc + curr["Zaklad ($)"],
+        0
+      );
+      const totalQolgan = dataForExcel.reduce(
+        (acc, curr) => acc + curr["Qolgan ($)"],
+        0
+      );
+      const totalJami = dataForExcel.reduce(
+        (acc, curr) => acc + curr["Jami ($)"],
+        0
+      );
+
+      // 3. Push a Summary Row to the array
+      dataForExcel.push({
+        ID: "JAMI:",
+        Sana: "",
+        Mijoz: "",
+        Telefon: "",
+        Shahar: "",
+        Mahsulot: "",
+        Brend: "",
+        Soni: "",
+        BTS: "",
+        Razmer: "",
+        Narxi: "",
+        "Zaklad ($)": totalZaklad,
+        "Qolgan ($)": totalQolgan,
+        "Jami ($)": totalJami,
+        Status: "",
+      });
+
+      // 4. Create Excel Workbook
       const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Delivered_Orders");
 
-      // 4. Download file
+      // 5. Download file
       const fileName = `Delivered_Orders_${new Date()
         .toISOString()
         .slice(0, 10)}.xlsx`;
       XLSX.writeFile(workbook, fileName);
 
-      // 5. Wipe collection using batches (handle up to 500 docs per batch)
+      // 6. Wipe collection
       const batch = writeBatch(db);
       snapshot.docs.forEach((doc) => {
         batch.delete(doc.ref);
       });
-
       await batch.commit();
 
       toast.success("Ma'lumotlar yuklab olindi va baza tozalandi!");
-      fetchData(); // Refresh UI
+      fetchData();
     } catch (error) {
       console.error("Export error:", error);
       toast.error("Xatolik yuz berdi");
@@ -408,19 +471,21 @@ export default function AdminOrders() {
       setLoading(false);
     }
   };
-  // useEffect(() => {
-  //   if (user) {
-  //     console.log("Logged in as:", user.email);
-  //   }
-  // }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      console.log("Logged in as:", user.email);
+    }
+  }, [user]);
   if (authLoading || loading) return <Spinner />;
 
   return (
     <div className="min-h-screen bg-white p-4 md:p-10 font-sans text-black">
       <div className="max-w-[1600px] mx-auto">
+        {/* <LogoutButton /> */}
         <header className="mb-8 flex justify-between items-center border-b pb-6">
           <div className="flex gap-8">
-            {user?.email === "daler1@gmail.com" && (
+            {isAdmin && (
               <>
                 <button
                   onClick={() => setView("orders")}
@@ -477,12 +542,14 @@ export default function AdminOrders() {
 
         <div className="hidden lg:grid grid-cols-12 gap-4 px-4 py-2 bg-gray-50 text-[10px] font-black uppercase text-gray-400 border mb-2">
           <div className="col-span-2">Mijoz / Telefon</div>
-          <div className="col-span-2">Manzil / Sana</div>
-          <div className="col-span-3">Mahsulot</div>
+          <div className="col-span-1">Manzil / Sana</div>
+          <div className="col-span-2">Mahsulot</div>
+          <div className="col-span-1 text-center">O'lcham</div>
           <div className="col-span-1 text-center">ID / Soni</div>
           <div className="col-span-2 text-right">
             {view === "orders" ? "Narxi" : "Zaklad / Qolgan"}
           </div>
+          <div className="col-span-1 text-center">BTS</div>
           <div className="col-span-2 text-right">Amal</div>
         </div>
 
@@ -503,7 +570,10 @@ export default function AdminOrders() {
                       Mahsulot
                     </th>
                     <th className="p-2 text-[10px] font-black uppercase tracking-tighter text-gray-400">
-                      ID
+                      O'lcham
+                    </th>
+                    <th className="p-2 text-[10px] font-black uppercase tracking-tighter text-gray-400">
+                      BTS
                     </th>
                     <th className="p-2 text-[10px] font-black uppercase tracking-tighter text-gray-400 text-right">
                       Zaklad
@@ -543,8 +613,13 @@ export default function AdminOrders() {
                         </p>
                       </td>
                       <td className="p-2">
+                        <p className="text-[10px] text-gray-700 italic truncate max-w-[150px]">
+                          {item.customer.size}
+                        </p>
+                      </td>
+                      <td className="p-2">
                         <span className="text-[9px] font-mono text-gray-400">
-                          #{item.id.slice(-5)}
+                          {/* #{item.id.slice(-5)} */}#{item.productBts}
                         </span>
                       </td>
                       {/* Zaklad */}
@@ -570,156 +645,194 @@ export default function AdminOrders() {
                     </tr>
                   ))}
                 </tbody>
+                <tfoot className="bg-gray-50 border-t-2 border-gray-200">
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="p-2 text-[10px] font-black uppercase text-right text-gray-400"
+                    >
+                      Jami:
+                    </td>
+                    {/* Total Zaklad */}
+                    <td className="p-2 text-[10px] font-black text-right text-green-600">
+                      $
+                      {deliveredItems
+                        .reduce((acc, item) => acc + (item.deposit || 0), 0)
+                        .toLocaleString()}
+                    </td>
+                    {/* Total Qolgan */}
+                    <td className="p-2 text-[10px] font-black text-right text-gray-900">
+                      $
+                      {deliveredItems
+                        .reduce(
+                          (acc, item) => acc + (item.totalRemaining || 0),
+                          0
+                        )
+                        .toLocaleString()}
+                    </td>
+                    {/* Total Jami */}
+                    <td className="p-2 text-[12px] font-black text-right text-black">
+                      $
+                      {deliveredItems
+                        .reduce(
+                          (acc, item) =>
+                            acc + item.productPrice * item.productQuantity,
+                          0
+                        )
+                        .toLocaleString()}
+                    </td>
+                    <td></td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
           ) : (
             /* ORIGINAL CARD VIEW: For Orders, Shipping, and Completed */
             <div className="space-y-2">
-              {(view === "orders"
-                ? orders
-                : view === "shipping"
-                ? shippingItems
-                : completedItems
-              ).map((item) => (
-                <div
-                  key={item.id}
-                  className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center bg-white border p-4 lg:p-3 hover:border-black transition-all"
-                >
-                  {/* Customer Info */}
-                  <div className="col-span-2">
-                    <p className="text-sm font-bold truncate">
-                      {item.customer.name}
-                    </p>
-                    <p className="text-[11px] text-gray-500 font-mono italic">
-                      {item.customer.social || item.customer.phone}
-                    </p>
-                  </div>
-
-                  {/* Location & Date */}
-                  <div className="col-span-2">
-                    <p className="text-[10px] font-black text-gray-900 uppercase mb-1 truncate">
-                      {item.customer.city}
-                    </p>
-                    <p className="text-[11px] text-gray-500 truncate">
-                      {item.customer.address}
-                    </p>
-                    <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">
-                      {item.localDate || "Sana mavjud emas"}
-                    </p>
-                  </div>
-
-                  {/* Product Details */}
-                  <div className="col-span-3 flex items-center gap-3">
-                    <div
-                      className="relative w-10 h-10 bg-gray-50 border flex-shrink-0 cursor-zoom-in overflow-hidden flex items-center justify-center"
-                      onClick={() =>
-                        item.productThumbnail &&
-                        setZoomedImages([item.productThumbnail])
-                      }
-                    >
-                      {item.productThumbnail ? (
-                        <Image
-                          src={item.productThumbnail}
-                          alt=""
-                          fill
-                          sizes="40px"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <span className="text-[8px] font-black uppercase text-gray-400 text-center px-1">
-                          No Image
-                        </span>
-                      )}
-                    </div>
-                    <div className="truncate">
-                      <p className="text-[9px] font-black text-red-600 uppercase leading-none">
-                        {item.productBrand}
+              {view === "orders" && !isAdmin ? (
+                <h1 className="text-center py-10 font-black text-red-500">
+                  BO'LIMNI TANLANG!
+                </h1>
+              ) : (
+                displayData.map((item) => (
+                  <div
+                    key={item.id}
+                    className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center bg-white border p-4 lg:p-3 hover:border-black transition-all"
+                  >
+                    {/* 1. Customer Info (col-span-2) */}
+                    <div className="col-span-2">
+                      <p className="text-sm font-bold truncate">
+                        {item.customer.name}
                       </p>
-                      <p className="text-xs font-bold truncate">
-                        {item.productName}
+                      <p className="text-[11px] text-gray-500 font-mono italic">
+                        {item.customer.phone}
                       </p>
-                      {item.description && (
-                        <p className="text-[10px] text-blue-600 italic truncate max-w-[150px]">
-                          "{item.description}"
-                        </p>
-                      )}
                     </div>
-                  </div>
 
-                  {/* ID & Quantity */}
-                  <div className="col-span-1 text-center flex flex-col items-center justify-center border-l border-r border-gray-50">
-                    <span className="text-[8px] font-black bg-gray-100 px-1 mb-1 text-gray-500 rounded uppercase">
-                      #{item.id.slice(0, 4)}
-                    </span>
-                    <span className="font-bold text-xs leading-none">
-                      x{item.productQuantity}
-                    </span>
-                  </div>
+                    {/* 2. Location & Date (col-span-1) */}
+                    <div className="col-span-1">
+                      <p className="text-[10px] font-black text-gray-900 uppercase truncate">
+                        {item.customer.city}
+                      </p>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase">
+                        {item.localDate?.split(",")[0] || "No Date"}
+                      </p>
+                    </div>
 
-                  {/* Pricing */}
-                  <div className="col-span-2 text-right">
-                    {view === "orders" ? (
-                      <span className="font-black text-sm">
-                        ${item.productPrice}
-                      </span>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-2 text-[11px] font-bold text-right">
-                        <span className="text-green-600">
-                          ${item.deposit || 0}
-                        </span>
-                        <span className="text-black font-black">
-                          ${item.totalRemaining}
-                        </span>
+                    {/* 3. Product Details (col-span-2) */}
+                    <div className="col-span-2 flex items-center gap-2">
+                      <div className="relative w-8 h-8 bg-gray-50 border flex-shrink-0 overflow-hidden flex items-center justify-center">
+                        {item.productThumbnail ? (
+                          <Image
+                            src={item.productThumbnail}
+                            alt=""
+                            fill
+                            sizes="32px"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <span className="text-[7px] text-gray-400">
+                            No Img
+                          </span>
+                        )}
                       </div>
-                    )}
-                  </div>
+                      <div className="truncate">
+                        <p className="text-[8px] font-black text-red-600 uppercase leading-none">
+                          {item.productBrand}
+                        </p>
+                        <p className="text-[11px] font-bold truncate">
+                          {item.productName}
+                        </p>
+                      </div>
+                    </div>
 
-                  {/* Action Buttons */}
-                  <div className="col-span-2 text-right">
-                    {view === "orders" && (
-                      <button
-                        onClick={() => {
-                          setSelectedOrder(item);
-                          setEditForm({
-                            price: item.productPrice,
-                            quantity: item.productQuantity,
-                            deposit: 0,
-                            description: "",
-                          });
-                        }}
-                        className="bg-black text-white text-[9px] font-black uppercase px-4 py-2 hover:bg-zinc-800"
-                      >
-                        Pending
-                      </button>
-                    )}
-
-                    {view === "shipping" && (
-                      <span className="bg-blue-50 text-blue-700 text-[8px] font-black uppercase px-2 py-1">
-                        Shipping
+                    {/* 4. SIZE (col-span-1) - NEW */}
+                    <div className="col-span-1 text-center">
+                      <span className="text-xs font-black px-2 py-1 bg-gray-100 rounded">
+                        {item.customer.size || "-"}
                       </span>
-                    )}
+                    </div>
 
-                    {view === "completed" && (
-                      <div className="flex flex-col items-end gap-2">
+                    {/* 5. ID & Quantity (col-span-1) */}
+                    <div className="col-span-1 text-center">
+                      <p className="text-[8px] text-gray-400 font-mono">
+                        #{item.id.slice(0, 4)}
+                      </p>
+                      <p className="font-bold text-xs">
+                        x{item.productQuantity}
+                      </p>
+                    </div>
+
+                    {/* 6. Pricing (col-span-2) */}
+                    <div className="col-span-2 text-right">
+                      {view === "orders" ? (
+                        <span className="font-black text-sm">
+                          ${item.productPrice}
+                        </span>
+                      ) : (
+                        <div className="flex flex-col text-[10px] font-bold">
+                          <span className="text-green-600">
+                            ${item.deposit || 0} (Z)
+                          </span>
+                          <span className="text-black">
+                            ${item.totalRemaining || 0} (Q)
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 7. BTS STATUS (col-span-1) - NEW */}
+                    <div className="col-span-1 text-center">
+                      <span className="text-[10px] font-bold text-blue-600 border border-blue-100 px-1 italic">
+                        {item.productBts || "-"}
+                      </span>
+                    </div>
+
+                    {/* 8. Action Buttons (col-span-2) */}
+                    <div className="col-span-2 text-right">
+                      {view === "orders" && (
+                        <button
+                          onClick={() => {
+                            setSelectedOrder(item);
+                            setEditForm({
+                              price: item.productPrice,
+                              quantity: item.productQuantity,
+                              deposit: 0,
+                              description: "",
+                            });
+                          }}
+                          className="bg-black text-white text-[9px] font-black uppercase px-3 py-2 hover:bg-zinc-800"
+                        >
+                          Manage
+                        </button>
+                      )}
+
+                      {view === "shipping" && (
+                        <button
+                          onClick={() => handleMarkAsShipped(item.id)}
+                          className="bg-blue-600 text-white text-[9px] font-black uppercase px-3 py-2 hover:bg-blue-700 transition-colors"
+                        >
+                          Jo'natish
+                        </button>
+                      )}
+
+                      {view === "completed" && (
                         <button
                           onClick={() => handleMarkAsDelivered(item)}
-                          className="bg-orange-500 text-white text-[8px] font-black uppercase px-3 py-1.5 hover:bg-orange-600 transition-colors"
+                          className="bg-orange-500 text-white text-[8px] font-black uppercase px-2 py-1.5 hover:bg-orange-600"
                         >
                           Topshirish
                         </button>
-                        <p className="text-[12px] text-gray-500">
-                          {item.movedAt?.toDate().toLocaleDateString()}
-                        </p>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           )}
         </div>
 
-        {view === "shipping" && shippingItems.length > 0 && (
+        {/* {view === "shipping" && isAdmin && shippingItems.length > 0 && (
           <div className="mt-12 flex justify-center border-t pt-10">
             <button
               onClick={handleBatchMarkAsShipped}
@@ -728,34 +841,34 @@ export default function AdminOrders() {
               Hammasini 'Yetkazildi' deb belgilash
             </button>
           </div>
-        )}
-        {view === "delivered" &&
-          user?.email === "daler1@gmail.com" &&
-          deliveredItems.length > 0 && (
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={exportAndWipeDelivered}
-                disabled={loading}
-                className="flex items-center gap-2 bg-green-600 text-white text-[10px] font-black uppercase px-6 py-3 hover:bg-green-700 transition-all shadow-sm disabled:bg-gray-400"
+        )} */}
+
+        {/* excel button */}
+        {view === "delivered" && isAdmin && deliveredItems.length > 0 && (
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={exportAndWipeDelivered}
+              disabled={loading}
+              className="flex items-center gap-2 bg-green-600 text-white text-[10px] font-black uppercase px-6 py-3 hover:bg-green-700 transition-all shadow-sm disabled:bg-gray-400"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  />
-                </svg>
-                Excel yuklash va Tozalash
-              </button>
-            </div>
-          )}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+              Excel yuklash va Tozalash
+            </button>
+          </div>
+        )}
         {/* MANUAL ORDER DRAWER */}
         {isManualModalOpen && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex justify-end">
@@ -944,6 +1057,25 @@ export default function AdminOrders() {
                             setManualForm({
                               ...manualForm,
                               price: Number(e.target.value) || 0,
+                            })
+                          }
+                          className="w-full border-b py-2 outline-none text-sm font-bold"
+                        />
+                      </label>
+                      <label className="block">
+                        <span className="text-[9px] font-black uppercase text-gray-400">
+                          O'lcham
+                        </span>
+                        <input
+                          required
+                          id="m-size"
+                          name="m-size"
+                          type="text"
+                          value={manualForm.size}
+                          onChange={(e) =>
+                            setManualForm({
+                              ...manualForm,
+                              size: e.target.value,
                             })
                           }
                           className="w-full border-b py-2 outline-none text-sm font-bold"

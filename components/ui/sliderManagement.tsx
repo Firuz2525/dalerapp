@@ -15,7 +15,6 @@ export default function SliderManagement() {
   // Real-time listener: Fetches current images
   useEffect(() => {
     const unsubscribe = subscribeToSlider((data) => {
-      console.log("Slider Data:", data); // Check if 'url' exists here!
       setImages(data);
     });
     return () => unsubscribe();

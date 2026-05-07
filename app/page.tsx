@@ -67,7 +67,6 @@ export default function Home() {
       setLoadingMore(false);
     }
   };
-  console.log(products);
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -137,29 +136,6 @@ export default function Home() {
                 </div>
               )}
             </button>
-            {/* <button
-              onClick={loadMore}
-              disabled={loadingMore}
-              className="group relative px-10 py-4 bg-black text-white transition-all hover:bg-gray-800 disabled:opacity-30 active:scale-95"
-            >
-              <span
-                className={`flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] ${
-                  loadingMore ? "opacity-0" : "opacity-100"
-                }`}
-              >
-                Yana yuklash
-                <HiOutlineChevronDown
-                  className="text-yellow-600 group-hover:translate-y-1 transition-transform"
-                  size={18}
-                />
-              </span>
-
-              {loadingMore && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                </div>
-              )}
-            </button> */}
             <p className="text-[9px] text-gray-400 uppercase tracking-[0.2em] mt-6">
               Yana {products.length}ta Mahsulot
             </p>

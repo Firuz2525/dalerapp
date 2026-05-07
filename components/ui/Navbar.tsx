@@ -5,6 +5,7 @@ import Link from "next/link";
 import { subscribeToCollection, FirestoreItem } from "@/lib/firestore";
 import { useCartStore } from "@/context/useCartStore";
 import { HiOutlineShoppingBag } from "react-icons/hi";
+import LogoutButton from "./LogoutButton";
 
 export default function Navbar() {
   const [activeMenu, setActiveMenu] = useState<
@@ -146,6 +147,7 @@ export default function Navbar() {
               </span>
             )}
           </button>
+          <LogoutButton />
         </nav>
 
         {/* Mobile Toggle Button */}
