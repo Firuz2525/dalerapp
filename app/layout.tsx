@@ -6,9 +6,27 @@ import HeroSlider from "@/components/ui/HeroSilder";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import CartDrawer from "@/components/cart/CartDrawer";
-export const metadata = {
-  title: "E-Commerce App",
-  description: "Modern e-commerce built with Next.js",
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "TokyoBrand",
+  description: "Premium-Class Mahsulotlar",
+  openGraph: {
+    title: "TokyoBrand",
+    description: "Premium-Class Mahsulotlar",
+    url: "https://tokyobrand.vercel.app/",
+    siteName: "TokyoBrand",
+    images: [
+      {
+        url: "https://tokyobrand.vercel.app/a1.jpeg", // Must be an absolute URL
+        width: 1200,
+        height: 630,
+        alt: "Premium Mahsulotlar",
+      },
+    ],
+    locale: "uz_UZ",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
