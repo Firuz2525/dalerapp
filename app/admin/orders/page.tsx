@@ -532,9 +532,7 @@ export default function AdminOrders() {
             <button
               onClick={() => setView("bts")}
               className={`text-xs font-black uppercase tracking-widest pb-2 transition-all ${
-                view === "delivered"
-                  ? "border-b-2 border-black"
-                  : "text-gray-400"
+                view === "bts" ? "border-b-2 border-black" : "text-gray-400"
               }`}
             >
               BTS ({btsItems.length})
