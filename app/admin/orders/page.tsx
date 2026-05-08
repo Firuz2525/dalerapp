@@ -76,13 +76,13 @@ export default function AdminOrders() {
   const [shippingItems, setShippingItems] = useState<ProductOrder[]>([]);
   const [completedItems, setCompletedItems] = useState<ProductOrder[]>([]);
   const [deliveredItems, setDeliveredItems] = useState<ProductOrder[]>([]);
+  const [btsItems, setBtsItems] = useState<ProductOrder[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const [searchId, setSearchId] = useState("");
 
   const [view, setView] = useState<
-    "orders" | "shipping" | "completed" | "delivered"
+    "orders" | "shipping" | "completed" | "delivered" | "bts"
   >("orders");
   const [selectedOrder, setSelectedOrder] = useState<ProductOrder | null>(null);
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
@@ -116,6 +116,8 @@ export default function AdminOrders() {
       ? completedItems
       : view === "delivered"
       ? deliveredItems
+      : view === "bts"
+      ? btsItems
       : [];
 
   useEffect(() => {
@@ -174,7 +176,14 @@ export default function AdminOrders() {
         allShippingDocs.filter((item) => item.status === "shipping")
       );
       setCompletedItems(
-        allShippingDocs.filter((item) => item.status === "shipped")
+        allShippingDocs.filter(
+          (item) => item.status === "shipped" && !item.productBts?.trim()
+        )
+      );
+      setBtsItems(
+        allShippingDocs.filter(
+          (item) => item.productBts && item.productBts.trim() !== ""
+        )
       );
 
       // Set delivered items from its dedicated collection
@@ -520,7 +529,16 @@ export default function AdminOrders() {
             >
               Yetkazilmoqda ({completedItems.length})
             </button>
-
+            <button
+              onClick={() => setView("bts")}
+              className={`text-xs font-black uppercase tracking-widest pb-2 transition-all ${
+                view === "delivered"
+                  ? "border-b-2 border-black"
+                  : "text-gray-400"
+              }`}
+            >
+              BTS ({btsItems.length})
+            </button>
             <button
               onClick={() => setView("delivered")}
               className={`text-xs font-black uppercase tracking-widest pb-2 transition-all ${
@@ -781,11 +799,52 @@ export default function AdminOrders() {
                       )}
                     </div>
 
-                    {/* 7. BTS STATUS (col-span-1) - NEW */}
-                    <div className="col-span-1 text-center">
-                      <span className="text-[10px] font-bold text-blue-600 border border-blue-100 px-1 italic">
-                        {item.productBts || "-"}
+                    {/* 7. BTS STATUS (col-span-1) */}
+                    <div className="col-span-1 flex flex-col items-center justify-center gap-1 border-l border-gray-50">
+                      {/* Display current BTS or placeholder */}
+                      <span
+                        className={`text-[12px] font-mono font-black px-2 py-1 rounded border shadow-sm ${
+                          item.productBts
+                            ? "bg-blue-50 text-blue-800 border-blue-200"
+                            : "bg-gray-50 text-gray-400 border-gray-100 italic font-normal"
+                        }`}
+                      >
+                        {item.productBts || "no-bts"}
                       </span>
+
+                      {/* Professional Edit Button */}
+                      <button
+                        onClick={async () => {
+                          const newBts = window.prompt(
+                            "BTS kodini kiriting:",
+                            item.productBts || ""
+                          );
+                          if (newBts === null) return;
+                          try {
+                            const docRef = doc(db, "shipping", item.id);
+                            await updateDoc(docRef, {
+                              productBts: newBts,
+                            });
+                            toast.success("BTS yangilandi!");
+                            fetchData();
+                          } catch (err: any) {
+                            // This will print the actual text of the error (e.g., "Permissions Denied")
+                            console.error(
+                              "Firebase Error Details:",
+                              err.code,
+                              err.message
+                            );
+                            toast.error(
+                              `Xatolik: ${
+                                err.message || "Baza bilan aloqa yo'q"
+                              }`
+                            );
+                          }
+                        }}
+                        className="text-[9px] font-black text-gray-400 uppercase tracking-widest hover:text-black transition-colors"
+                      >
+                        +BTS
+                      </button>
                     </div>
 
                     {/* 8. Action Buttons (col-span-2) */}
@@ -816,7 +875,7 @@ export default function AdminOrders() {
                         </button>
                       )}
 
-                      {view === "completed" && (
+                      {(view === "completed" || view === "bts") && (
                         <button
                           onClick={() => handleMarkAsDelivered(item)}
                           className="bg-orange-500 text-white text-[8px] font-black uppercase px-2 py-1.5 hover:bg-orange-600"
