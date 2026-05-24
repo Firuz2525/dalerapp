@@ -30,7 +30,6 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import * as XLSX from "xlsx";
 import { useRouter } from "next/navigation";
-import LogoutButton from "@/components/ui/logout";
 
 interface ProductOrder {
   id: string; // This is the Firestore Document ID
@@ -408,6 +407,7 @@ export default function AdminOrders() {
           Telefon: item.customer.phone,
           Shahar: item.customer.city,
           Mahsulot: item.productName,
+          Izoh: item.description,
           Brend: item.productBrand,
           Soni: item.productQuantity,
           BTS: item.productBts,
@@ -442,6 +442,7 @@ export default function AdminOrders() {
         Telefon: "",
         Shahar: "",
         Mahsulot: "",
+        Izoh: "",
         Brend: "",
         Soni: "",
         BTS: "",
@@ -491,7 +492,6 @@ export default function AdminOrders() {
   return (
     <div className="min-h-screen bg-white p-4 md:p-10 font-sans text-black">
       <div className="max-w-[1600px] mx-auto">
-        {/* <LogoutButton /> */}
         <header className="mb-8 flex justify-between items-center border-b pb-6">
           <div className="flex gap-8">
             {isAdmin && (
@@ -627,6 +627,9 @@ export default function AdminOrders() {
                         <p className="text-[10px] text-gray-700 italic truncate max-w-[150px]">
                           {item.productName}
                         </p>
+                        <i className="text-[11px] truncate text-blue-600">
+                          {item.description}
+                        </i>
                       </td>
                       <td className="p-2">
                         <p className="text-[10px] text-gray-700 italic truncate max-w-[150px]">
@@ -737,7 +740,16 @@ export default function AdminOrders() {
 
                     {/* 3. Product Details (col-span-2) */}
                     <div className="col-span-2 flex items-center gap-2">
-                      <div className="relative w-8 h-8 bg-gray-50 border flex-shrink-0 overflow-hidden flex items-center justify-center">
+                      <div
+                        onClick={(e) => {
+                          e.preventDefault();
+                          // Wrap it inside an array literal to satisfy string[] requirement
+                          if (item.productThumbnail) {
+                            setZoomedImages([item.productThumbnail]);
+                          }
+                        }}
+                        className="relative w-8 h-8 bg-gray-50 border flex-shrink-0 overflow-hidden flex items-center justify-center"
+                      >
                         {item.productThumbnail ? (
                           <Image
                             src={item.productThumbnail}
@@ -759,6 +771,9 @@ export default function AdminOrders() {
                         <p className="text-[11px] font-bold truncate">
                           {item.productName}
                         </p>
+                        <i className="text-[11px] truncate text-blue-600">
+                          {item.description}
+                        </i>
                       </div>
                     </div>
 
