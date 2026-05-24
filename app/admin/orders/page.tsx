@@ -492,65 +492,70 @@ export default function AdminOrders() {
   return (
     <div className="min-h-screen bg-white p-4 md:p-10 font-sans text-black">
       <div className="max-w-[1600px] mx-auto">
-        <header className="mb-8 flex justify-between items-center border-b pb-6">
-          <div className="flex gap-8">
-            {isAdmin && (
-              <>
-                <button
-                  onClick={() => setView("orders")}
-                  className={`text-xs font-black uppercase tracking-widest pb-2 transition-all ${
-                    view === "orders"
-                      ? "border-b-2 border-black"
-                      : "text-gray-400"
-                  }`}
-                >
-                  Yangi ({orders.length})
-                </button>
+        <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-6 gap-4">
+          {/* Left Section: Scrollable Nav Container */}
+          <div className="w-full md:w-auto overflow-x-auto no-scrollbar border-b md:border-b-0 pb-2 md:pb-0">
+            <div className="flex gap-8 whitespace-nowrap min-w-max px-1">
+              {isAdmin && (
+                <>
+                  <button
+                    onClick={() => setView("orders")}
+                    className={`text-xs font-black uppercase tracking-widest pb-2 transition-all ${
+                      view === "orders"
+                        ? "border-b-2 border-black"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    Yangi ({orders.length})
+                  </button>
 
-                <button
-                  onClick={() => setView("shipping")}
-                  className={`text-xs font-black uppercase tracking-widest pb-2 transition-all ${
-                    view === "shipping"
-                      ? "border-b-2 border-black"
-                      : "text-gray-400"
-                  }`}
-                >
-                  Process ({shippingItems.length})
-                </button>
-              </>
-            )}
-            <button
-              onClick={() => setView("completed")}
-              className={`text-xs font-black uppercase tracking-widest pb-2 transition-all ${
-                view === "completed"
-                  ? "border-b-2 border-black"
-                  : "text-gray-400"
-              }`}
-            >
-              Yetkazilmoqda ({completedItems.length})
-            </button>
-            <button
-              onClick={() => setView("bts")}
-              className={`text-xs font-black uppercase tracking-widest pb-2 transition-all ${
-                view === "bts" ? "border-b-2 border-black" : "text-gray-400"
-              }`}
-            >
-              BTS ({btsItems.length})
-            </button>
-            <button
-              onClick={() => setView("delivered")}
-              className={`text-xs font-black uppercase tracking-widest pb-2 transition-all ${
-                view === "delivered"
-                  ? "border-b-2 border-black"
-                  : "text-gray-400"
-              }`}
-            >
-              Topshirildi ({deliveredItems.length})
-            </button>
+                  <button
+                    onClick={() => setView("shipping")}
+                    className={`text-xs font-black uppercase tracking-widest pb-2 transition-all ${
+                      view === "shipping"
+                        ? "border-b-2 border-black"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    Process ({shippingItems.length})
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => setView("completed")}
+                className={`text-xs font-black uppercase tracking-widest pb-2 transition-all ${
+                  view === "completed"
+                    ? "border-b-2 border-black"
+                    : "text-gray-400"
+                }`}
+              >
+                Yetkazilmoqda ({completedItems.length})
+              </button>
+              <button
+                onClick={() => setView("bts")}
+                className={`text-xs font-black uppercase tracking-widest pb-2 transition-all ${
+                  view === "bts" ? "border-b-2 border-black" : "text-gray-400"
+                }`}
+              >
+                BTS ({btsItems.length})
+              </button>
+              <button
+                onClick={() => setView("delivered")}
+                className={`text-xs font-black uppercase tracking-widest pb-2 transition-all ${
+                  view === "delivered"
+                    ? "border-b-2 border-black"
+                    : "text-gray-400"
+                }`}
+              >
+                Topshirildi ({deliveredItems.length})
+              </button>
+            </div>
           </div>
+
+          {/* Right Section: Action Button */}
           <button
             onClick={() => setIsManualModalOpen(true)}
-            className="bg-black text-white px-6 py-2 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-zinc-800 transition-all flex items-center gap-2"
+            className="w-full md:w-auto bg-black text-white px-6 py-3 md:py-2 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 shrink-0"
           >
             Yangi Buyurtma <span className="text-sm">+</span>
           </button>
