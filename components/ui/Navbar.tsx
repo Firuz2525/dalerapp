@@ -136,7 +136,7 @@ export default function Navbar() {
           >
             Contact
           </Link>
-          <button
+          {/* <button
             onClick={toggleCart}
             className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-grey-600 hover:text-black relative p-2 ml-2"
           >
@@ -146,13 +146,13 @@ export default function Navbar() {
                 {items.length}
               </span>
             )}
-          </button>
+          </button> */}
           <LogoutButton />
         </nav>
 
         {/* Mobile Toggle Button */}
         <div className="flex md:hidden">
-          <button
+          {/* <button
             onClick={toggleCart}
             className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-grey-600 hover:text-black relative p-2 ml-2"
           >
@@ -162,7 +162,7 @@ export default function Navbar() {
                 {items.length}
               </span>
             )}
-          </button>
+          </button> */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2"

@@ -77,7 +77,7 @@ export default function Home() {
 
   return (
     <>
-      <HeroSlider />
+      {/* <HeroSlider /> */}
 
       <main className="max-w-7xl p-4 md:p-8 mx-auto min-h-screen">
         {/* Header Section */}

@@ -83,13 +83,13 @@ export default function ProductCard({ product, priority = false }: Props) {
         <div className="flex justify-between items-center pt-1">
           <p className="text-sm font-bold text-black">${product.price}</p>
 
-          <button
+          {/* <button
             onClick={handleAddToCart}
             className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-600 hover:text-black"
             aria-label="Add to basket"
           >
             <HiOutlineShoppingBag size={18} />
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
